@@ -15,7 +15,7 @@ header h1{margin:0 0 4px;font-size:22px}header p{margin:0;color:#b9c4d6;font-siz
 .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 5vw;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
 .bar button{border:1px solid var(--line);background:#fff;padding:7px 14px;border-radius:6px;cursor:pointer;font:inherit}
 .bar button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
-.bar label{margin-left:auto;font-size:13px;color:var(--mut)}
+.bar .ld{margin-left:auto;font-size:13px;color:var(--mut);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 main{padding:20px 5vw;max-width:1200px;margin:auto}
 section{display:none}section.on{display:block}
 h2{font-size:18px;margin:4px 0 6px}.note{color:var(--mut);font-size:13px;margin:0 0 12px}
@@ -36,9 +36,10 @@ td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
 <header><h1>한국 산업구조 진단·시뮬레이션 대시보드</h1><p>2023년 투입산출표 · 생산자가격 · 대/중/소/기본부문 전환 · 금액 단위 백만원(표시는 억원·조원)</p></header>
 <div class="bar">
  <button class="on" data-t="t1">① 산업 진단</button><button data-t="t2">② 파급효과 시뮬레이터</button><button data-t="t3">③ 수출·수입 구조와 공급충격</button><button data-t="t4">④ 원자료 탐색 (12개 시트)</button>
- <label>분류 수준 <select id="lvl"><option>대분류</option><option>중분류</option><option>소분류</option><option>기본부문</option></select> <span id="cnt"></span></label>
+ <div class="ld">분류 수준 <select id="lvl"><option>대분류</option><option>중분류</option><option>소분류</option><option>기본부문</option></select> <button class="go" id="lb">불러오기</button> <span id="cnt"></span></div>
 </div>
 <main>
+<div id="gate" class="card" style="margin-bottom:16px"><h2>먼저 투입산출표를 불러오세요</h2><p class="note">오른쪽 위에서 분류 수준(대분류·중분류·소분류·기본부문)을 고르고 <b>불러오기</b> 버튼을 누르면 투입산출표가 로딩됩니다. 로딩된 뒤에 ① 산업 진단, ② 파급효과 시뮬레이터, ③ 수출·수입 구조와 공급충격, ④ 원자료 탐색을 사용할 수 있습니다.</p><button class="go" id="lb2">대분류 불러오기로 시작</button></div>
 <section id="t1" class="on">
  <h2>어떤 산업이 중요한가?</h2>
  <p class="note">영향력계수가 1보다 크면 그 산업의 수요가 늘 때 경제 전체가 평균보다 크게 늘어납니다. 감응도계수가 1보다 크면 다른 산업이 성장할 때 그 산업이 평균보다 크게 영향을 받습니다. 점을 클릭하거나 목록에서 산업을 고르세요.</p>
@@ -87,11 +88,12 @@ async function load(l){
   '수입유발계수(수요 1원당 수입)':i=>D.impind[i],'수입투입계수(직접 수입 중간재 비율)':i=>D.amsum[i],'부가가치유발계수':i=>D.vaind[i]};
  ['s1','s2','s3'].forEach(id=>$('#'+id).innerHTML=opt());
  $('#mt').innerHTML=Object.keys(D.met).map(k=>`<option>${k}</option>`).join('');
- $('#cnt').textContent=n+'개 부문';xreset();SC=[[],[]];list();$('#r2').innerHTML='<span class="li">산업과 금액을 추가하면 결과가 표시됩니다.</span>';$('#r3').innerHTML='';
+ $('#cnt').textContent=$('#lvl').value+' '+n+'개 부문 로딩 완료';xreset();SC=[[],[]];list();$('#r2').innerHTML='<span class="li">산업과 금액을 추가하면 결과가 표시됩니다.</span>';$('#r3').innerHTML='';
  show(document.querySelector('.bar .on').dataset.t);
 }
-function show(t){document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id==t));
- document.querySelectorAll('.bar button').forEach(b=>b.classList.toggle('on',b.dataset.t==t));
+function gate(){document.querySelectorAll('section').forEach(s=>s.classList.remove('on'));$('#gate').style.display='block'}
+function show(t){if(!D){gate();document.querySelectorAll('.bar button[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t==t));return}$('#gate').style.display='none';document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id==t));
+ document.querySelectorAll('.bar button[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t==t));
  if(t=='t1'){scatter();diag()}if(t=='t3')rank()}
 function scatter(){const k=+$('#s1').value,p=D.names.map((_,i)=>({x:D.infl[i],y:D.sens[i]})),mx=Math.max(...D.infl,...D.sens)*1.05;
  mk('c1',{type:'scatter',data:{datasets:[{data:p,pointRadius:4,backgroundColor:'#0f766e88'},{data:[p[k]],pointRadius:8,backgroundColor:'#b45309'},
@@ -125,8 +127,8 @@ function shock(){const s=+$('#s3').value,p=+$('#pc').value/100,n=D.n;let t=Array
  for(let k=0;k<30;k++){const nt=Array(n).fill(0);for(let i=0;i<n;i++){if(!t[i]||D.out[i]<=0)continue;const f=t[i]/D.out[i],z=D.Z[i];for(let j=0;j<n;j++)nt[j]+=f*z[j]}t=nt;for(let j=0;j<n;j++)cum[j]+=t[j]}
  const l=cum.map(x=>-x),tp=topk(l.map((x,i)=>i==s?0:x),10);
  $('#r3').innerHTML=`<p class="li">${D.names[s]} 생산 ${(p*100).toFixed(0)}% 감소(${won(p*D.out[s])}) → 하류 산업 생산 감소 합계 약 ${won(sum(l)-l[s])}</p><table><tr><th>산업</th><th class="r">감소액</th><th class="r">자기 산출 대비</th></tr>${tp.map(([i,v])=>`<tr><td>${D.names[i]}</td><td class="r">${won(v)}</td><td class="r">${pct(v/D.out[i])}</td></tr>`).join('')}</table>`}
-document.querySelectorAll('.bar button').forEach(b=>b.onclick=()=>show(b.dataset.t));
-$('#lvl').onchange=e=>load(e.target.value);$('#s1').onchange=diag;$('#mt').onchange=rank;$('#shk').onclick=shock;
+document.querySelectorAll('.bar button[data-t]').forEach(b=>b.onclick=()=>show(b.dataset.t));
+$('#lb').onclick=async()=>{$('#cnt').textContent='불러오는 중...';try{await load($('#lvl').value)}catch(e){$('#cnt').textContent='자료를 불러오지 못했습니다'}};$('#lb2').onclick=()=>{$('#lvl').value='대분류';$('#lb').click()};$('#lvl').onchange=()=>{if(D)$('#lb').click();else $('#cnt').textContent='불러오기 버튼을 누르세요'};$('#s1').onchange=diag;$('#mt').onchange=rank;$('#shk').onclick=shock;
 $('#add').onclick=()=>{const a=+$('#amt').value;if(a>0){SC[+$('#sc').value].push([+$('#s2').value,a]);list();res()}};
 $('#clr').onclick=()=>{SC=[[],[]];list();$('#r2').innerHTML=''};
 $('#lst').onclick=e=>{if(e.target.dataset.j){e.preventDefault();SC[e.target.dataset.j].splice(e.target.dataset.q,1);list();res()}};
@@ -144,7 +146,7 @@ function xshow(){if(!X)return;const i=$('#xr').value,q=$('#xcq').value.trim();if
  const fm=v=>typeof v=='number'?v.toLocaleString('ko-KR',{maximumFractionDigits:6}):(v==null?'':v);
  $('#xt').innerHTML=X.cc.map((c,j)=>[j,c]).filter(([j,c])=>!q||((c||'')+' '+(X.cn[j]||'')).includes(q)).map(([j,c])=>`<tr><td>${c==null?'':c}</td><td>${X.cn[j]||''}</td><td class="r">${fm(X.v[i][j])}</td></tr>`).join('')}
 $('#xl').onclick=xload;$('#xq').oninput=xrows;$('#xr').onchange=xshow;$('#xcq').oninput=xshow;
-load('대분류');
+gate();
 </script>
 </body>
 </html>
