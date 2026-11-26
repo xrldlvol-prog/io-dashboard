@@ -92,15 +92,15 @@ function scatter(){const k=+$('#s1').value,p=D.names.map((_,i)=>({x:D.infl[i],y:
  options:{maintainAspectRatio:false,onClick:(e,_,c)=>{const h=c.getElementsAtEventForMode(e,'nearest',{intersect:true},false).find(x=>x.datasetIndex==0);if(h){$('#s1').value=h.index;diag()}},
  plugins:{legend:{display:false},tooltip:{filter:t=>t.datasetIndex<2,callbacks:{label:c=>{const i=c.datasetIndex?+$('#s1').value:c.dataIndex;return `${D.names[i]} (영향력 ${c.parsed.x.toFixed(2)}, 감응도 ${c.parsed.y.toFixed(2)})`}}}},
  scales:{x:{min:0,title:{display:true,text:'영향력계수 (다른 산업을 끌어올리는 힘)'}},y:{min:0,title:{display:true,text:'감응도계수 (다른 산업의 영향을 받는 정도)'}}}}})}
-const top=(a,k)=>a.map((v,i)=>[i,v]).sort((x,y)=>y[1]-x[1]).slice(0,k);
+const topk=(a,k)=>a.map((v,i)=>[i,v]).sort((x,y)=>y[1]-x[1]).slice(0,k);
 const tb=(rows,tot)=>`<table>${rows.map(([i,v])=>`<tr><td>${D.names[i]}</td><td class="r">${won(v)}</td><td class="r">${tot?(v/tot*100).toFixed(1)+'%':''}</td></tr>`).join('')}</table>`;
 function diag(){const k=+$('#s1').value;
  if(ch.c1){ch.c1.data.datasets[1].data=[{x:D.infl[k],y:D.sens[k]}];ch.c1.update()}
  const a=D.infl[k]>=1,b=D.sens[k]>=1,ty=a&&b?'핵심 산업 (영향력·감응도 모두 큼)':a?'전방 연쇄형 (다른 산업을 끌어올리는 힘이 큼)':b?'중간재 공급형 (다른 산업의 영향을 크게 받음)':'독립적 산업 (둘 다 작음)';
  const o=D.out[k],c=D.cost,sh=(l,v)=>`<tr><td>${l}</td><td class="r">${(v/o*100).toFixed(1)}%</td></tr>`;
  $('#d1').innerHTML=`<p><span class="tag">${ty}</span></p><p class="li">영향력 ${D.infl[k].toFixed(3)} · 감응도 ${D.sens[k].toFixed(3)} · 수입유발 ${D.impind[k].toFixed(3)} · 부가가치유발 ${D.vaind[k].toFixed(3)}<br>총산출 ${won(o)}</p>
- <b>이 산업이 사 오는 곳 (상위 10)</b>${tb(top(D.Z.map(r=>r[k]),10),sum(D.Z.map(r=>r[k])))}
- <b>이 산업이 파는 곳 (상위 10)</b>${tb(top(D.Z[k],10),sum(D.Z[k]))}
+ <b>이 산업이 사 오는 곳 (상위 10)</b>${tb(topk(D.Z.map(r=>r[k]),10),sum(D.Z.map(r=>r[k])))}
+ <b>이 산업이 파는 곳 (상위 10)</b>${tb(topk(D.Z[k],10),sum(D.Z[k]))}
  <b>비용 구조 (총투입 대비)</b><table>${sh('중간투입',c.mid[k])}${sh('피용자보수',c.comp[k])}${sh('영업잉여',c.op[k])}${sh('고정자본소모',c.dep[k])}${sh('생산세(보조금 공제)',c.tax[k])}</table>`}
 function list(){$('#lst').innerHTML=SC.map((s,j)=>`<b>${'AB'[j]}</b>: `+(s.map((x,q)=>`${D.names[x[0]]} +${x[1].toLocaleString()}억원 <a href="#" data-j="${j}" data-q="${q}">삭제</a>`).join(' / ')||'없음')).join('<br>')}
 function calc(s){const dF=Array(D.n).fill(0);s.forEach(([i,a])=>dF[i]+=a*100);
@@ -108,15 +108,15 @@ function calc(s){const dF=Array(D.n).fill(0);s.forEach(([i,a])=>dF[i]+=a*100);
  return{dF:sum(dF),px:sum(dX),va:dF.reduce((t,f,j)=>t+f*D.vaind[j],0),im:dF.reduce((t,f,j)=>t+f*D.impind[j],0),dX}}
 function res(){const R=SC.map(s=>s.length?calc(s):null);if(!R[0]&&!R[1])return;
  const row=(l,f)=>`<tr><td>${l}</td>${R.map(r=>`<td class="r">${r?f(r):'-'}</td>`).join('')}</tr>`;
- const t=(r,j)=>r?`<div class="${j?'hot':''}"><b>${'AB'[j]} 생산유발 상위 10</b><table>${top(r.dX,10).map(([i,v])=>`<tr><td>${D.names[i]}</td><td class="r">${won(v)}</td><td style="width:35%"><div class="mb" style="width:${v/Math.max(...r.dX)*100}%"></div></td></tr>`).join('')}</table></div>`:'';
+ const t=(r,j)=>r?`<div class="${j?'hot':''}"><b>${'AB'[j]} 생산유발 상위 10</b><table>${topk(r.dX,10).map(([i,v])=>`<tr><td>${D.names[i]}</td><td class="r">${won(v)}</td><td style="width:35%"><div class="mb" style="width:${v/Math.max(...r.dX)*100}%"></div></td></tr>`).join('')}</table></div>`:'';
  $('#r2').innerHTML=`<table><tr><th></th><th class="r">시나리오 A</th><th class="r">시나리오 B</th></tr>${row('최종수요 증가액',r=>won(r.dF))}${row('생산유발액',r=>won(r.px))}${row('부가가치유발액',r=>won(r.va))}${row('수입유발액',r=>won(r.im))}${row('생산승수(생산유발/수요)',r=>(r.px/r.dF).toFixed(2))}${row('부가가치 비율',r=>pct(r.va/r.dF))}</table><div class="grid" style="margin-top:14px">${t(R[0],0)}${t(R[1],1)}</div>`}
 const pct=v=>(v*100).toFixed(1)+'%';
 function rank(){const f=D.met[$('#mt').value],v=D.names.map((_,i)=>D.out[i]>0?f(i):0),pc=$('#mt').value.includes('비중');
- const t=top(v,15);mk('c3',{type:'bar',data:{labels:t.map(x=>D.names[x[0]]),datasets:[{data:t.map(x=>x[1]),backgroundColor:'#0f766e'}]},
+ const t=topk(v,15);mk('c3',{type:'bar',data:{labels:t.map(x=>D.names[x[0]]),datasets:[{data:t.map(x=>x[1]),backgroundColor:'#0f766e'}]},
  options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>pc?pct(c.parsed.x):c.parsed.x.toFixed(3)}}}}})}
 function shock(){const s=+$('#s3').value,p=+$('#pc').value/100,n=D.n;let t=Array(n).fill(0),cum=Array(n).fill(0);t[s]=-p*D.out[s];
  for(let k=0;k<30;k++){const nt=Array(n).fill(0);for(let i=0;i<n;i++){if(!t[i]||D.out[i]<=0)continue;const f=t[i]/D.out[i],z=D.Z[i];for(let j=0;j<n;j++)nt[j]+=f*z[j]}t=nt;for(let j=0;j<n;j++)cum[j]+=t[j]}
- const l=cum.map(x=>-x),tp=top(l.map((x,i)=>i==s?0:x),10);
+ const l=cum.map(x=>-x),tp=topk(l.map((x,i)=>i==s?0:x),10);
  $('#r3').innerHTML=`<p class="li">${D.names[s]} 생산 ${(p*100).toFixed(0)}% 감소(${won(p*D.out[s])}) → 하류 산업 생산 감소 합계 약 ${won(sum(l)-l[s])}</p><table><tr><th>산업</th><th class="r">감소액</th><th class="r">자기 산출 대비</th></tr>${tp.map(([i,v])=>`<tr><td>${D.names[i]}</td><td class="r">${won(v)}</td><td class="r">${pct(v/D.out[i])}</td></tr>`).join('')}</table>`}
 document.querySelectorAll('.bar button').forEach(b=>b.onclick=()=>show(b.dataset.t));
 $('#lvl').onchange=e=>load(e.target.value);$('#s1').onchange=diag;$('#mt').onchange=rank;$('#shk').onclick=shock;
