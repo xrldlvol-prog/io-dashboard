@@ -40,7 +40,7 @@ td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
  <div class="ld">분류 수준 <select id="lvl"><option>대분류</option><option>중분류</option><option>소분류</option><option>기본부문</option></select> <button class="go" id="lb">불러오기</button> <span id="cnt"></span></div>
 </div>
 <main>
-<div id="gate" class="card" style="margin-bottom:16px"><h2>먼저 투입산출표를 불러오세요</h2><p class="note">오른쪽 위에서 분류 수준(대분류·중분류·소분류·기본부문)을 고르고 <b>불러오기</b> 버튼을 누르면 투입산출표가 로딩됩니다. 로딩된 뒤에 ① 원자료 탐색, ② 산업 진단, ③ 파급효과 시뮬레이터, ④ 수출·수입 구조와 공급충격을 사용할 수 있습니다.</p><button class="go" id="lb2">대분류 불러오기로 시작</button></div>
+<div id="gate" class="card" style="margin-bottom:16px"><h2>먼저 투입산출표를 불러오세요</h2><p class="note">화면 <b>오른쪽 위</b>에서 분류 수준(대분류·중분류·소분류·기본부문)을 고르고 <b>불러오기</b> 버튼을 누르면 투입산출표가 로딩됩니다. 로딩된 뒤에 ① 원자료 탐색, ② 산업 진단, ③ 파급효과 시뮬레이터, ④ 수출·수입 구조와 공급충격을 사용할 수 있습니다.</p></div>
 <section id="t4" class="on">
  <h2>투입산출표 원자료 탐색</h2>
  <p class="note">분류 수준(오른쪽 위)과 시트를 고르고 <b>불러오기</b>를 누르면 엑셀의 해당 시트가 로딩됩니다. 행(산업)을 검색해서 고르면 그 행이 각 열과 어떻게 연결되는지 볼 수 있습니다. 금액표는 백만원, 계수표는 단위 없는 비율이며, 합계·유발계수 같은 요약 행은 행 이름을 확인하세요.</p>
@@ -132,7 +132,7 @@ function shock(){const s=+$('#s3').value,p=+$('#pc').value/100,n=D.n;let t=Array
  const l=cum.map(x=>-x),tp=topk(l.map((x,i)=>i==s?0:x),10);
  $('#r3').innerHTML=`<p class="li">${D.names[s]} 생산 ${(p*100).toFixed(0)}% 감소(${won(p*D.out[s])}) → 하류 산업 생산 감소 합계 약 ${won(sum(l)-l[s])}</p><table><tr><th>산업</th><th class="r">감소액</th><th class="r">자기 산출 대비</th></tr>${tp.map(([i,v])=>`<tr><td>${D.names[i]}</td><td class="r">${won(v)}</td><td class="r">${pct(v/D.out[i])}</td></tr>`).join('')}</table>`}
 document.querySelectorAll('.bar button[data-t]').forEach(b=>b.onclick=()=>show(b.dataset.t));
-$('#lb').onclick=async()=>{$('#cnt').textContent='불러오는 중...';try{await load($('#lvl').value)}catch(e){$('#cnt').textContent='자료를 불러오지 못했습니다'}};$('#lb2').onclick=()=>{$('#lvl').value='대분류';$('#lb').click()};$('#lvl').onchange=()=>{if(D)$('#lb').click();else $('#cnt').textContent='불러오기 버튼을 누르세요'};$('#s1').onchange=diag;$('#mt').onchange=rank;$('#shk').onclick=shock;
+$('#lb').onclick=async()=>{$('#cnt').textContent='불러오는 중...';try{await load($('#lvl').value)}catch(e){$('#cnt').textContent='자료를 불러오지 못했습니다'}};$('#lvl').onchange=()=>{if(D)$('#lb').click();else $('#cnt').textContent='불러오기 버튼을 누르세요'};$('#s1').onchange=diag;$('#mt').onchange=rank;$('#shk').onclick=shock;
 $('#add').onclick=()=>{const a=+$('#amt').value;if(a>0){SC[+$('#sc').value].push([+$('#s2').value,a]);list();res()}};
 $('#clr').onclick=()=>{SC=[[],[]];list();$('#r2').innerHTML=''};
 $('#lst').onclick=e=>{if(e.target.dataset.j){e.preventDefault();SC[e.target.dataset.j].splice(e.target.dataset.q,1);list();res()}};
