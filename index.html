@@ -30,19 +30,28 @@ td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
 .mb{height:6px;background:var(--acc);border-radius:3px;min-width:1px}.hot .mb{background:var(--hot)}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;align-items:center}
 .li{font-size:13px;color:var(--mut)}
+.unit{background:#e8f1f2;border-left:4px solid var(--acc);padding:8px 12px;font-size:13px;margin:0 0 14px;border-radius:4px}
 </style>
 </head>
 <body>
 <header><h1>한국 산업구조 진단·시뮬레이션 대시보드</h1><p>2023년 투입산출표 · 생산자가격 · 대/중/소/기본부문 전환 · 금액 단위 백만원(표시는 억원·조원)</p></header>
 <div class="bar">
- <button class="on" data-t="t1">① 산업 진단</button><button data-t="t2">② 파급효과 시뮬레이터</button><button data-t="t3">③ 수출·수입 구조와 공급충격</button><button data-t="t4">④ 원자료 탐색 (12개 시트)</button>
+ <button class="on" data-t="t4">① 원자료 탐색 (12개 시트)</button><button data-t="t1">② 산업 진단</button><button data-t="t2">③ 파급효과 시뮬레이터</button><button data-t="t3">④ 수출·수입 구조와 공급충격</button>
  <div class="ld">분류 수준 <select id="lvl"><option>대분류</option><option>중분류</option><option>소분류</option><option>기본부문</option></select> <button class="go" id="lb">불러오기</button> <span id="cnt"></span></div>
 </div>
 <main>
-<div id="gate" class="card" style="margin-bottom:16px"><h2>먼저 투입산출표를 불러오세요</h2><p class="note">오른쪽 위에서 분류 수준(대분류·중분류·소분류·기본부문)을 고르고 <b>불러오기</b> 버튼을 누르면 투입산출표가 로딩됩니다. 로딩된 뒤에 ① 산업 진단, ② 파급효과 시뮬레이터, ③ 수출·수입 구조와 공급충격, ④ 원자료 탐색을 사용할 수 있습니다.</p><button class="go" id="lb2">대분류 불러오기로 시작</button></div>
-<section id="t1" class="on">
+<div id="gate" class="card" style="margin-bottom:16px"><h2>먼저 투입산출표를 불러오세요</h2><p class="note">오른쪽 위에서 분류 수준(대분류·중분류·소분류·기본부문)을 고르고 <b>불러오기</b> 버튼을 누르면 투입산출표가 로딩됩니다. 로딩된 뒤에 ① 원자료 탐색, ② 산업 진단, ③ 파급효과 시뮬레이터, ④ 수출·수입 구조와 공급충격을 사용할 수 있습니다.</p><button class="go" id="lb2">대분류 불러오기로 시작</button></div>
+<section id="t4" class="on">
+ <h2>투입산출표 원자료 탐색</h2>
+ <p class="note">분류 수준(오른쪽 위)과 시트를 고르고 <b>불러오기</b>를 누르면 엑셀의 해당 시트가 로딩됩니다. 행(산업)을 검색해서 고르면 그 행이 각 열과 어떻게 연결되는지 볼 수 있습니다. 금액표는 백만원, 계수표는 단위 없는 비율이며, 합계·유발계수 같은 요약 행은 행 이름을 확인하세요.</p>
+ <div class="card"><div class="row"><select id="xs"></select><button class="go" id="xl">불러오기</button><span class="li" id="xst">분류 수준과 시트를 고른 뒤 불러오기를 누르세요.</span></div>
+  <div class="grid"><div><div class="row"><input id="xq" placeholder="행(산업) 이름·코드 검색" style="width:100%"></div><select id="xr" size="12" style="width:100%"></select></div>
+  <div><div class="row"><input id="xcq" placeholder="열 이름·코드 검색" style="width:100%"></div><div style="max-height:320px;overflow:auto"><table><thead><tr><th>열 코드</th><th>열 이름</th><th class="r">값</th></tr></thead><tbody id="xt"><tr><td colspan="3" class="li">자료를 불러온 후 행을 선택하면 표시됩니다.</td></tr></tbody></table></div></div></div></div>
+</section>
+<section id="t1">
  <h2>어떤 산업이 중요한가?</h2>
  <p class="note">영향력계수가 1보다 크면 그 산업의 수요가 늘 때 경제 전체가 평균보다 크게 늘어납니다. 감응도계수가 1보다 크면 다른 산업이 성장할 때 그 산업이 평균보다 크게 영향을 받습니다. 점을 클릭하거나 목록에서 산업을 고르세요.</p>
+ <div class="unit"><b>단위·지표 안내</b> 영향력계수·감응도계수는 전 산업 평균을 1로 맞춘 상대지수(단위 없음)입니다. 수입유발계수·부가가치유발계수는 국산품 최종수요 1원당 유발되는 수입·부가가치(원/원, 단위 없음)입니다. 총산출은 억원·조원(원자료는 백만원)으로 표시하고, 비용 구조는 총산출(=총투입) 대비 %입니다.</div>
  <div class="grid">
   <div class="card"><div class="chart"><canvas id="c1"></canvas></div></div>
   <div class="card"><div class="row"><select id="s1"></select></div><div id="d1"></div></div>
@@ -51,6 +60,7 @@ td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
 <section id="t2">
  <h2>수요가 늘면 어디까지 퍼지는가?</h2>
  <p class="note">국산품에 대한 최종수요(소비·투자·수출 등)가 늘어나는 시나리오를 A, B로 만들어 비교합니다. 여러 산업을 추가하면 합산됩니다.</p>
+ <div class="unit"><b>단위·지표 안내</b> 입력은 국산품 최종수요 증가액(억원, 1억원 = 100백만원)이고, 생산·부가가치·수입 유발액은 억원·조원으로 표시합니다. 생산승수 = 생산유발액 ÷ 최종수요 증가액(배, 단위 없음), 부가가치 비율 = 부가가치유발액 ÷ 최종수요 증가액(%)입니다.</div>
  <div class="card"><div class="row"><select id="sc"><option value="0">시나리오 A</option><option value="1">시나리오 B</option></select><select id="s2"></select>
   <input id="amt" type="number" min="0" value="10000" style="width:120px"> 억원 <button class="go" id="add">추가</button><button id="clr">전체 비우기</button></div>
   <div class="li" id="lst"></div></div>
@@ -58,19 +68,13 @@ td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
 </section>
 <section id="t3">
  <h2>수출·수입 구조와 공급충격</h2>
+ <div class="unit"><b>단위·지표 안내</b> 수출·소비·투자 비중은 최종수요(수출+소비+투자) 중 해당 항목의 비율(%)입니다. 수입유발계수·부가가치유발계수는 최종수요 1원당 유발액(원/원), 수입투입계수는 총투입 1원당 직접 투입되는 수입 중간재(원/원)이며 모두 단위 없는 비율입니다. 공급충격은 감소율(%)을 입력하고, 감소액은 억원·조원, '자기 산출 대비'는 감소액 ÷ 해당 산업 원래 총산출(%)입니다.</div>
  <div class="grid">
   <div class="card"><div class="row"><select id="mt"></select></div><div class="chart"><canvas id="c3"></canvas></div></div>
   <div class="card"><h2 style="font-size:16px">공급충격 시나리오</h2>
    <p class="note">특정 산업의 생산(공급)이 줄면 그 산업의 제품을 중간재로 쓰는 하류 산업의 공급이 어떻게 줄어드는지를 단순 추정합니다(고쉬 공급측 모형, 연쇄 전파의 상한에 가까운 값).</p>
    <div class="row"><select id="s3"></select><input id="pc" type="number" min="1" max="100" value="10" style="width:70px"> % 감소 <button class="go" id="shk">계산</button></div><div id="r3"></div></div>
  </div>
-</section>
-<section id="t4">
- <h2>투입산출표 원자료 탐색</h2>
- <p class="note">분류 수준(오른쪽 위)과 시트를 고르고 <b>불러오기</b>를 누르면 엑셀의 해당 시트가 로딩됩니다. 행(산업)을 검색해서 고르면 그 행이 각 열과 어떻게 연결되는지 볼 수 있습니다. 금액표는 백만원, 계수표는 단위 없는 비율이며, 합계·유발계수 같은 요약 행은 행 이름을 확인하세요.</p>
- <div class="card"><div class="row"><select id="xs"></select><button class="go" id="xl">불러오기</button><span class="li" id="xst">분류 수준과 시트를 고른 뒤 불러오기를 누르세요.</span></div>
-  <div class="grid"><div><div class="row"><input id="xq" placeholder="행(산업) 이름·코드 검색" style="width:100%"></div><select id="xr" size="12" style="width:100%"></select></div>
-  <div><div class="row"><input id="xcq" placeholder="열 이름·코드 검색" style="width:100%"></div><div style="max-height:320px;overflow:auto"><table><thead><tr><th>열 코드</th><th>열 이름</th><th class="r">값</th></tr></thead><tbody id="xt"><tr><td colspan="3" class="li">자료를 불러온 후 행을 선택하면 표시됩니다.</td></tr></tbody></table></div></div></div></div>
 </section>
 </main>
 <script>
