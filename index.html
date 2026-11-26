@@ -72,7 +72,7 @@ const mk=(id,c)=>{ch[id]&&ch[id].destroy();ch[id]=new Chart($('#'+id),c)};
 const sum=a=>a.reduce((x,y)=>x+y,0);
 const opt=()=>D.names.map((n,i)=>`<option value="${i}">${D.codes[i]} ${n}</option>`).join('');
 async function load(l){
- D=await(await fetch(`${({'대분류':'large','중분류':'mid','소분류':'small','기본부문':'basic'})[l]}.json`)).json();const n=D.n=D.names.length;
+ const f=({'대분류':'large','중분류':'mid','소분류':'small','기본부문':'basic'})[l];let r=await fetch(f+'.json');if(!r.ok)r=await fetch('data/'+f+'.json');if(!r.ok){$('#cnt').textContent='자료 파일을 찾지 못했습니다: '+f+'.json';return}D=await r.json();const n=D.n=D.names.length;
  const rs=D.Ld.map(sum),cs=D.names.map((_,j)=>D.Ld.reduce((a,r)=>a+r[j],0)),m=a=>sum(a)/a.length;
  D.infl=cs.map(x=>x/m(cs));D.sens=rs.map(x=>x/m(rs));
  const fd=i=>D.exp[i]+D.cons[i]+D.inv[i];
