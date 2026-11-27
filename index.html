@@ -109,7 +109,7 @@ const topk=(a,k)=>a.map((v,i)=>[i,v]).sort((x,y)=>y[1]-x[1]).slice(0,k);
 const tb=(rows,tot)=>`<table>${rows.map(([i,v])=>`<tr><td>${D.names[i]}</td><td class="r">${won(v)}</td><td class="r">${tot?(v/tot*100).toFixed(1)+'%':''}</td></tr>`).join('')}</table>`;
 function diag(){const k=+$('#s1').value;
  if(ch.c1){ch.c1.data.datasets[1].data=[{x:D.infl[k],y:D.sens[k]}];ch.c1.update()}
- const a=D.infl[k]>=1,b=D.sens[k]>=1,ty=a&&b?'핵심 산업 (영향력·감응도 모두 큼)':a?'전방 연쇄형 (다른 산업을 끌어올리는 힘이 큼)':b?'중간재 공급형 (다른 산업의 영향을 크게 받음)':'독립적 산업 (둘 다 작음)';
+ const a=D.infl[k]>=1,b=D.sens[k]>=1,ty=a&&b?'핵심 산업 (영향력·감응도 모두 큼)':a?'후방 연쇄형 (다른 산업을 끌어올리는 힘이 큼)':b?'중간재 공급형 (다른 산업의 영향을 크게 받음)':'독립적 산업 (둘 다 작음)';
  const o=D.out[k],c=D.cost,sh=(l,v)=>`<tr><td>${l}</td><td class="r">${(v/o*100).toFixed(1)}%</td></tr>`;
  $('#d1').innerHTML=`<p><span class="tag">${ty}</span></p><p class="li">영향력 ${D.infl[k].toFixed(3)} · 감응도 ${D.sens[k].toFixed(3)} · 수입유발 ${D.impind[k].toFixed(3)} · 부가가치유발 ${D.vaind[k].toFixed(3)}<br>총산출 ${won(o)}</p>
  <b>이 산업이 사 오는 곳 (상위 10)</b>${tb(topk(D.Z.map(r=>r[k]),10),sum(D.Z.map(r=>r[k])))}
